@@ -2,13 +2,6 @@
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python Version](https://img.shields.io/badge/Python-3.10%2B-blue)](https://python.org)
 
-## Table of Contents
-- [MCP Server Configuration](#mcp-server-configuration)
-  - [Table of Contents](#table-of-contents)
-  - [Server Setup](#server-setup)
-  - [Installation](#installation)
-  - [License](#license)
-
 ## Server Setup
 Add this configuration to your Claude client's MCP settings:
 ```json
