@@ -7,7 +7,7 @@ mcp = FastMCP("Android source code")
 
 def is_android_project(project_dir: str) -> bool:
     """Validate if a directory is an Android project root by checking for key gradle files."""
-    path = Path(project_dir)
+    path = Path(project_dir).expanduser().resolve()
     
     # Check if directory exists
     if not path.is_dir():
@@ -22,32 +22,59 @@ def is_android_project(project_dir: str) -> bool:
 
 @mcp.tool()
 async def validate_android_project(project_dir: str) -> str:
-    """Validate if a directory is an Android project root.
-    Returns success message if valid, otherwise error details.
+    """Check if a directory is a valid Android project.
+    
+    Args:
+        project_dir: Full path or relative path to the Android project directory
+    
+    Returns:
+        A message indicating whether the directory is a valid Android project.
+        A valid Android project must have settings.gradle and build.gradle files.
+        
+    Example:
+        validate_android_project("/path/to/project") -> "Valid Android project detected at: /path/to/project"
+        validate_android_project("~/android-projects/my-app") -> "Valid Android project detected at: /Users/..."
     """
-    path = Path(project_dir)
+    path = Path(project_dir).expanduser().resolve()
     
     if not path.is_dir():
-        return f"Error: Directory does not exist: {project_dir}"
+        return f"Error: Directory does not exist: {path}"
     
     if is_android_project(project_dir):
-        return f"Valid Android project detected at: {project_dir}"
+        return f"Valid Android project detected at: {path}"
     else:
         return f"Not a valid Android project. Missing essential gradle configuration files."
 
 @mcp.tool()
 async def get_all_project_files(project_dir: str) -> str:
-    """Get list of available files in android project. Returns
-    kotlin files, kts files, toml files and AndriodManifest.xml file.
-    Output shows project root and files grouped by relative directory.
+    """Get list of relevant files in an Android project, organized by directory.
+    
+    Args:
+        project_dir: Full path or relative path to the Android project directory
+    
+    Returns:
+        A formatted string showing all Kotlin, KTS, TOML files and AndroidManifest.xml
+        files in the project, grouped by directory.
+        
+    Example:
+        get_all_project_files("/path/to/android/project")
+        
+    Example output:
+        Project root: /path/to/android/project
+        
+        dir: app/src/main
+        files: MainActivity.kt, OtherActivity.kt
+        
+        dir: app/src/main/java/com/example
+        files: MyClass.kt, Utils.kt
     """
-    path = Path(project_dir)
+    path = Path(project_dir).expanduser().resolve()
     
     if not path.is_dir():
-        raise ValueError(f"Directory does not exist: {project_dir}")
+        raise ValueError(f"Directory does not exist: {path}")
     
     if not is_android_project(project_dir):
-        raise ValueError(f"Not a valid Android project: {project_dir}")
+        raise ValueError(f"Not a valid Android project: {path}")
     
     dir_files = {}
     
@@ -72,16 +99,29 @@ async def get_all_project_files(project_dir: str) -> str:
 
 @mcp.tool()
 async def read_project_file(project_dir: str, file_path: str) -> str:
-    """Read contents of a file from an android project. Returns raw file content.
-    Only allows files with extensions: .kt, .kts, .toml, .md or AndroidManifest.xml
+    """Read contents of a single file from an Android project.
+    
+    Args:
+        project_dir: Full path or relative path to the Android project directory
+        file_path: Path to the file relative to the project root
+                 
+    Returns:
+        Raw content of the requested file as a string
+        
+    Note:
+        Only allows reading files with extensions: .kt, .kts, .toml, .md 
+        or files named AndroidManifest.xml
+        
+    Example:
+        read_project_file("/path/to/project", "app/src/main/java/com/example/MainActivity.kt")
     """
-    root = Path(project_dir)
+    root = Path(project_dir).expanduser().resolve()
     
     if not root.is_dir():
-        raise ValueError(f"Directory does not exist: {project_dir}")
+        raise ValueError(f"Directory does not exist: {root}")
     
     if not is_android_project(project_dir):
-        raise ValueError(f"Not a valid Android project: {project_dir}")
+        raise ValueError(f"Not a valid Android project: {root}")
     
     full_path = root / file_path
     
@@ -99,16 +139,30 @@ async def read_project_file(project_dir: str, file_path: str) -> str:
 
 @mcp.tool()
 async def read_multiple_project_files(project_dir: str, file_paths: List[str]) -> str:
-    """Read contents of multiple files from an android project. Returns concatenated content with file headers.
-    Only allows files with extensions: .kt, .kts, .toml, .md or AndroidManifest.xml
+    """Read contents of multiple files from an Android project.
+    
+    Args:
+        project_dir: Full path or relative path to the Android project directory
+        file_paths: List of file paths relative to the project root
+                 
+    Returns:
+        Concatenated content of all requested files, with file headers separating each file
+        
+    Note:
+        Only allows reading files with extensions: .kt, .kts, .toml, .md 
+        or files named AndroidManifest.xml
+        
+    Example:
+        read_multiple_project_files("/path/to/project", 
+            ["app/build.gradle.kts", "app/src/main/AndroidManifest.xml"])
     """
-    root = Path(project_dir)
+    root = Path(project_dir).expanduser().resolve()
     
     if not root.is_dir():
-        raise ValueError(f"Directory does not exist: {project_dir}")
+        raise ValueError(f"Directory does not exist: {root}")
     
     if not is_android_project(project_dir):
-        raise ValueError(f"Not a valid Android project: {project_dir}")
+        raise ValueError(f"Not a valid Android project: {root}")
     
     output = []
     
